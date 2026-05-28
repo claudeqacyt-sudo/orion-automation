@@ -1,0 +1,18 @@
+{
+  "comment": "Datos de usuarios de prueba. Completar con datos reales del ambiente de TEST.",
+  "admin": {
+    "username": "COMPLETAR",
+    "password": "COMPLETAR",
+    "role": "Administrador"
+  },
+  "supervisor": {
+    "username": "COMPLETAR",
+    "password": "COMPLETAR",
+    "role": "Supervisor"
+  },
+  "agent": {
+    "username": "COMPLETAR",
+    "password": "COMPLETAR",
+    "role": "Agente"
+  }
+}
