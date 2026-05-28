@@ -29,11 +29,14 @@ class SupervisionNav:
         """Abre un item del menu Supervision en nueva pestana."""
         self.page.locator(self.MENU_SUPERVISION).wait_for(state='visible', timeout=10000)
         self.page.evaluate(f"document.querySelector('{self.MENU_SUPERVISION}').click()")
-        time.sleep(1.0)
+        time.sleep(1.2)
         with self.page.context.expect_page(timeout=15000) as new_page_info:
             self.page.evaluate(f"document.querySelector('{item_id}').click()")
         tab = new_page_info.value
-        tab.wait_for_load_state('domcontentloaded')
+        try:
+            tab.wait_for_load_state('domcontentloaded', timeout=15000)
+        except Exception:
+            time.sleep(3)
         time.sleep(2)
         return tab
 

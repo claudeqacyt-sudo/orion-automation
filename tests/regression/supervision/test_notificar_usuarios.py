@@ -265,6 +265,51 @@ class TestNotificarUsuarios:
 
     # ── NTF-001-J ────────────────────────────────────────────────────
 
+    def test_NTF001_campos_aceptan_texto(self, notificar_tab):
+        """
+        NTF-001-J: Los campos #txtAsunto y #txaMensaje aceptan texto correctamente.
+
+        Verifica que:
+          - El campo asunto acepta y retiene el texto ingresado
+          - El campo mensaje acepta y retiene el texto ingresado
+          - Los campos respetan su maxlength (40 para asunto, 500 para mensaje)
+
+        NOTA: No se hace click en Enviar — solo se verifica que los campos
+        reciben input sin errores ni comportamientos inesperados.
+        """
+        page_obj = notificar_tab
+
+        asunto_input  = page_obj.page.locator(NotificarUsuariosPage.INPUT_ASUNTO)
+        mensaje_input = page_obj.page.locator(NotificarUsuariosPage.TEXTAREA_MENSAJE)
+
+        # Llenar asunto
+        asunto_input.fill("Test automatizado asunto")
+        valor_asunto = asunto_input.input_value()
+        assert valor_asunto == "Test automatizado asunto", \
+            f"El campo asunto no retuvo el texto: '{valor_asunto}'"
+
+        # Llenar mensaje
+        mensaje_input.fill("Este es un mensaje de prueba automatizado.")
+        valor_mensaje = mensaje_input.input_value()
+        assert valor_mensaje == "Este es un mensaje de prueba automatizado.", \
+            f"El campo mensaje no retuvo el texto: '{valor_mensaje}'"
+
+        # Verificar maxlength del asunto (40 caracteres)
+        max_asunto = page_obj.page.evaluate(
+            "() => document.getElementById('txtAsunto').maxLength"
+        )
+        assert max_asunto == 40, \
+            f"El maxlength de #txtAsunto deberia ser 40, es {max_asunto}"
+
+        # Verificar maxlength del mensaje (500 caracteres)
+        max_mensaje = page_obj.page.evaluate(
+            "() => document.getElementById('txaMensaje').maxLength"
+        )
+        assert max_mensaje == 500, \
+            f"El maxlength de #txaMensaje deberia ser 500, es {max_mensaje}"
+
+    # ── NTF-001-K ────────────────────────────────────────────────────
+
     def test_NTF001_boton_refresh_historial(self, notificar_tab):
         """
         NTF-001-J: El boton de refrescar el historial (#btnRefreshTable)
