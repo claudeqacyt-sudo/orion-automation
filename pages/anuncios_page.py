@@ -1,6 +1,6 @@
 """
 anuncios_page.py - Page Object para el modulo Anuncios de Orion Contact Center
-Selectores verificados contra HTML real de Orion v7.0 (10.1.10.150:8080)
+Selectores verificados contra HTML real de Orion v7.0 (vm-2k22-er-01.orioncontactcenter.com.ar)
 
 Ruta de navegacion: menu top-level -> Anuncios (accionEjecutar_1)
 
