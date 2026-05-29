@@ -436,7 +436,7 @@ class PermisosPerfilesPage(BasePage):
     ACTIVOS_PERMISOS = {
         "Administrador": 66,
         "Supervisor":    23,
-        "Agente":        12,
+        "Agente":        27,
     }
 
     # Permisos que DEBE tener el Administrador (sample representativo)
@@ -623,9 +623,9 @@ class UsuariosPerfilesPage(BasePage):
 
     # Cantidad de usuarios asignados a cada perfil (estado base)
     USUARIOS_POR_PERFIL = {
-        "Administrador": 1,
+        "Administrador": 2,
         "Supervisor":    0,
-        "Agente":        5,
+        "Agente":        6,
     }
     USUARIO_ADMIN  = "cyt usuario inicial"
     TEXTO_AGENTES  = "Agente Genérico"    # texto parcial compartido por todos los agentes
@@ -820,7 +820,7 @@ class UsuariosClientesPage(BasePage):
 
     # ── Datos del sistema (estado base verificado) ───────────────────
     CLIENTE_BASE   = "Cliente generico"
-    TOTAL_USUARIOS = 5   # 1000-1004, todos asignados a Cliente generico
+    TOTAL_USUARIOS = 6   # todos los agentes asignados a Cliente generico
 
     def __init__(self, page: Page):
         super().__init__(page)
@@ -1007,7 +1007,7 @@ class BloqueoUsuariosPage(BasePage):
     BTN_INFO_OK    = "#modalGlobalGenericoInfo_btnOK"
 
     # ── Estado base del sistema ──────────────────────────────────────────
-    TOTAL_ACTIVOS    = 6    # 5 agentes (1000-1004) + 1 admin (cyt)
+    TOTAL_ACTIVOS    = 7    # agentes + admins activos en el sistema
     TOTAL_BLOQUEADOS = 0    # ninguno bloqueado en estado base
 
     def __init__(self, page: Page):

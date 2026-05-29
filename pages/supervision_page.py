@@ -103,7 +103,7 @@ class NotificarUsuariosPage(BasePage):
     CLIENTE_GENERICO     = "1"
 
     # Constantes del estado base
-    TOTAL_USUARIOS       = 6
+    TOTAL_USUARIOS       = 8
     CLIENTE_BASE_TEXT    = "Cliente generico"
 
     def __init__(self, page):
