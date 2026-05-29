@@ -1,94 +1,131 @@
 # Orion Contact Center — QA Automation
 
-Suite de automatización de regresión para el sistema **Orion Contact Center v7.0** de CYT Comunicaciones.
+Suite de regresión automatizada para **Orion Contact Center v7.0** (CYT Comunicaciones).  
+Construida con Python + Playwright + pytest.
 
-## Stack tecnológico
-- **Python** 3.12
-- **Playwright** — Framework de automatización web
-- **pytest** — Test runner
-- **pytest-playwright** — Integración Playwright + pytest
-- **pandas / openpyxl** — Validación de reportes exportados (CSV/Excel)
-- **pytest-html** — Reportes HTML
+---
+
+## Requisitos previos
+
+- **Python 3.12** instalado → https://www.python.org/downloads/
+- **Git** instalado → https://git-scm.com/download/win
+- Acceso a la red donde corre el servidor Orion
+
+---
+
+## Instalación (primera vez)
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/claudeqacyt-sudo/orion-automation.git
+cd orion-automation
+
+# 2. Crear entorno virtual
+python -m venv venv
+
+# 3. Activar el entorno virtual
+#    Windows:
+venv\Scripts\activate
+#    Mac/Linux:
+source venv/bin/activate
+
+# 4. Instalar dependencias
+pip install -r requirements.txt
+
+# 5. Instalar el browser de Playwright
+playwright install chromium
+
+# 6. Crear el archivo de configuración
+copy .env.example .env
+```
+
+### 6. Editar el `.env` con los datos reales
+
+Abrir el archivo `.env` y completar:
+
+```
+ORION_BASE_URL=http://10.1.10.150:8080   # URL del servidor Orion
+ADMIN_USERNAME=cyt                        # Usuario administrador
+ADMIN_PASSWORD=tu_password                # Contraseña
+```
+
+---
+
+## Ejecutar la regresión
+
+```bash
+# Activar entorno virtual (si no está activo)
+venv\Scripts\activate
+
+# Ejecutar TODA la suite de regresión
+python -m pytest tests/regression/ -v
+
+# Ejecutar solo un módulo específico
+python -m pytest tests/regression/usuarios/ -v
+python -m pytest tests/regression/supervision/ -v
+python -m pytest tests/regression/monitor/ -v
+
+# Ejecutar un archivo específico
+python -m pytest tests/regression/usuarios/test_gestion_perfiles.py -v
+
+# Ver el browser mientras corre (modo headed)
+python -m pytest tests/regression/ -v --headed
+```
+
+El reporte HTML se genera automáticamente en `reports/report.html`.
+
+---
+
+## Cobertura actual — Etapa 1 (usuario Administrador)
+
+| Módulo | ID | Tests | Tiempo aprox. |
+|---|---|---|---|
+| Gestión de Perfiles | USR-001 | 11 | |
+| Permisos de Perfiles | USR-002 | 9 | |
+| Usuarios de Perfiles | USR-003 | 7 | |
+| Usuarios de Clientes | USR-004 | 7 | |
+| Bloqueo de Usuarios | USR-005 | 8 | |
+| Monitor de Efectividad | MON-001 | 4 | |
+| Notificar Usuarios | NTF-001 | 11 | |
+| **Total** | | **57 tests** | **~7 min** |
+
+---
 
 ## Estructura del proyecto
 
 ```
 orion-automation/
+├── pages/                        # Page Objects (POM)
+│   ├── base_page.py              # Clase base
+│   ├── login_page.py             # Login / Logout
+│   ├── usuarios_page.py          # Modulo Usuarios (USR-001 a USR-005)
+│   ├── monitor_page.py           # Monitor de Efectividad (MON-001)
+│   └── supervision_page.py       # Supervision: Notificar Usuarios (NTF-001)
 ├── tests/
-│   ├── smoke/                   # Tests de humo (login, acceso básico)
+│   ├── smoke/                    # Test de humo (login basico)
 │   └── regression/
-│       ├── monitor/             # Monitor Online y Monitores Globales
-│       ├── reports/             # Todos los reportes (IVR, Campañas, Discador)
-│       ├── config/              # Configuración (Agentes, Colas, Habilidades)
-│       └── campaigns/           # Campañas, Lotes, Segmentación
-├── pages/                       # Page Object Model (POM)
-│   ├── base_page.py
-│   ├── login_page.py
-│   └── monitor_page.py
-├── fixtures/                    # Datos de prueba
-│   └── users.json
-├── utils/                       # Helpers y utilidades
+│       ├── usuarios/             # USR-001 a USR-005
+│       ├── monitor/              # MON-001
+│       └── supervision/          # NTF-001
+├── fixtures/
+│   └── users.json                # Datos de prueba
+├── utils/
 │   └── helpers.py
-├── reports/                     # Reportes generados (git-ignorado)
-├── conftest.py                  # Configuración global de pytest
-├── pytest.ini                   # Configuración de pytest
-├── requirements.txt             # Dependencias Python
-├── .env.example                 # Template de variables de entorno
-└── .env                         # Variables de entorno (NO commitear)
+├── conftest.py                   # Fixtures globales (login, sesion compartida)
+├── pytest.ini                    # Configuracion de pytest
+├── requirements.txt              # Dependencias
+└── .env.example                  # Template de variables de entorno
 ```
 
-## Configuración inicial
+---
 
-### 1. Crear entorno virtual e instalar dependencias
-```bash
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-playwright install chromium
-```
+## Notas importantes
 
-### 2. Configurar variables de entorno
-```bash
-copy .env.example .env
-# Editar .env con la URL real y credenciales del sistema Orion
-```
-
-### 3. Completar selectores CSS
-Abrir el sistema Orion con DevTools (F12) e inspeccionar los elementos para
-actualizar los selectores en los archivos de `pages/`.
-
-## Ejecución de tests
-
-```bash
-# Activar entorno virtual
-venv\Scripts\activate
-
-# Ejecutar TODOS los tests
-pytest
-
-# Solo tests de SMOKE (para verificar que el ambiente funciona)
-pytest -m smoke
-
-# POC: Monitor Online
-pytest tests/regression/monitor/test_monitor_online.py -v
-
-# Con browser visible (no headless)
-pytest --headed
-
-# Con reporte HTML
-pytest --html=reports/report.html --self-contained-html
-```
-
-## POC — Prueba de Concepto
-
-El primer caso implementado es:
-**REG-MON-001**: Login → Monitor Online → Verificar tabla de agentes → Logout
-
-Ver: `tests/regression/monitor/test_monitor_online.py`
-
-## Pasos pendientes antes de ejecutar
-1. Completar `ORION_BASE_URL` en el archivo `.env`
-2. Completar credenciales en `.env`
-3. Ajustar selectores CSS en `pages/login_page.py` inspeccionando el HTML real
-4. Ajustar selectores CSS en `pages/monitor_page.py`
-5. Completar columnas reales en `MonitorPage.EXPECTED_COLUMNS`
+- Los tests de regresión usan una **sesión compartida** (login único por ejecución).
+- El servidor Orion tiene un **timeout de sesión de 130 segundos**. El conftest maneja esto automáticamente.
+- Todos los tests que modifican datos **restauran el estado original** al terminar (try/finally).
+- El archivo `.env` **nunca se commitea** — contiene credenciales reales.
+- Los tests están diseñados para correr contra el **estado base del sistema**:
+  - 3 perfiles: Administrador, Supervisor, Agente
+  - 5 agentes: 1000 al 1004
+  - 1 cliente: Cliente generico
