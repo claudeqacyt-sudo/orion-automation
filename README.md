@@ -24,9 +24,9 @@ cd orion-automation
 python -m venv venv
 
 # 3. Activar el entorno virtual
-#    Windows:
+#    Windows (PowerShell o CMD):
 venv\Scripts\activate
-#    Mac/Linux:
+#    Mac / Linux:
 source venv/bin/activate
 
 # 4. Instalar dependencias
@@ -36,8 +36,14 @@ pip install -r requirements.txt
 playwright install chromium
 
 # 6. Crear el archivo de configuración
+#    PowerShell (Windows 11):
+cp .env.example .env
+#    CMD clásico:
 copy .env.example .env
 ```
+
+> **Nota Windows — PowerShell:** Si al activar el venv aparece un error de permisos,
+> ejecutar primero: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
 
 ### 6. Editar el `.env` con los datos reales
 
