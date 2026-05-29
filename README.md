@@ -125,13 +125,31 @@ orion-automation/
 
 ---
 
-## Notas importantes
+## Requisitos para que los tests pasen
+
+### Acceso de red
+El servidor Orion está en una red interna. La máquina donde se ejecutan los tests debe estar **en la misma red local o conectada por VPN**. No funciona desde internet.
+
+### Estado base del sistema
+Los tests verifican datos concretos del sistema. Para que pasen, el servidor Orion debe tener exactamente:
+
+| Dato | Valor esperado |
+|---|---|
+| Perfiles | 3 (Administrador, Supervisor, Agente) |
+| Agentes | 5 (usuarios 1000 al 1004) |
+| Clientes | 1 (Cliente generico) |
+| Usuarios bloqueados | 0 |
+
+Si se corre contra un servidor Orion con datos distintos, los tests que verifican conteos fallarán. En ese caso hay que ajustar las constantes en los page objects (`pages/usuarios_page.py`, etc.).
+
+### Credenciales
+El `.env` debe tener usuario y contraseña de un **administrador** del sistema Orion.
+
+---
+
+## Notas técnicas
 
 - Los tests de regresión usan una **sesión compartida** (login único por ejecución).
 - El servidor Orion tiene un **timeout de sesión de 130 segundos**. El conftest maneja esto automáticamente.
 - Todos los tests que modifican datos **restauran el estado original** al terminar (try/finally).
 - El archivo `.env` **nunca se commitea** — contiene credenciales reales.
-- Los tests están diseñados para correr contra el **estado base del sistema**:
-  - 3 perfiles: Administrador, Supervisor, Agente
-  - 5 agentes: 1000 al 1004
-  - 1 cliente: Cliente generico
