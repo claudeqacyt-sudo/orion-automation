@@ -2,47 +2,44 @@
 
 Seguí estos pasos en orden. No hace falta saber programar.
 
+Abrir **PowerShell** (buscar "PowerShell" en el menú Inicio) y ejecutar los comandos de cada paso.
+
 ---
 
 ## Paso 1 — Instalar Python
 
-1. Ir a **https://www.python.org/downloads/**
-2. Hacer clic en el botón amarillo **"Download Python 3.12.x"**
-3. Ejecutar el instalador descargado
-4. **IMPORTANTE:** En la primera pantalla del instalador, tildar la opción **"Add Python to PATH"** antes de hacer clic en Install
-5. Hacer clic en **"Install Now"**
-6. Cuando termine, hacer clic en **"Close"**
+```powershell
+winget install --id Python.Python.3.12 -e --accept-package-agreements --accept-source-agreements
+```
+
+Esto descarga e instala Python 3.12 automáticamente.  
+Cuando termine, **cerrar y volver a abrir PowerShell**.
 
 **Verificar que funcionó:**
-Abrir PowerShell (buscar "PowerShell" en el menú Inicio) y escribir:
-```
+```powershell
 python --version
 ```
-Debe mostrar algo como `Python 3.12.x`
+Debe mostrar: `Python 3.12.x`
 
 ---
 
 ## Paso 2 — Instalar Git
 
-1. Ir a **https://git-scm.com/download/win**
-2. Descargar el instalador de 64-bit
-3. Ejecutarlo y hacer clic en **"Next"** en todas las pantallas (las opciones por defecto están bien)
-4. Al final hacer clic en **"Install"** y luego **"Finish"**
+```powershell
+winget install --id Git.Git -e --accept-package-agreements --accept-source-agreements
+```
+
+Cuando termine, **cerrar y volver a abrir PowerShell**.
 
 **Verificar que funcionó:**
-En PowerShell escribir:
-```
+```powershell
 git --version
 ```
-Debe mostrar algo como `git version 2.x.x`
-
-> **Nota:** Si PowerShell da un error después de instalar Git, cerrarlo y volver a abrirlo.
+Debe mostrar: `git version 2.x.x`
 
 ---
 
 ## Paso 3 — Descargar el proyecto
-
-En PowerShell, ejecutar estos comandos uno por uno:
 
 ```powershell
 cd $env:USERPROFILE\Desktop
@@ -56,7 +53,7 @@ Esto descarga el proyecto en una carpeta llamada `orion-automation` en el Escrit
 
 ## Paso 4 — Preparar el entorno
 
-Seguir ejecutando en PowerShell (dentro de la carpeta `orion-automation`):
+Ejecutar estos comandos uno por uno (dentro de la carpeta `orion-automation`):
 
 ```powershell
 # Crear entorno virtual
@@ -73,7 +70,7 @@ Cuando pregunte, escribir `S` y presionar Enter.
 # Activar el entorno virtual
 venv\Scripts\activate
 ```
-El prompt cambia y aparece `(venv)` al inicio — eso significa que está activo.
+El prompt cambia y aparece `(venv)` al inicio — eso indica que está activo.
 
 ```powershell
 # Instalar las dependencias
@@ -96,32 +93,30 @@ Esto puede tardar 1-2 minutos (descarga ~170 MB).
 cp .env.example .env
 ```
 
-Ahora abrir el archivo `.env` con el Bloc de Notas:
 ```powershell
+# Abrir el archivo para editarlo
 notepad .env
 ```
 
-Modificar las siguientes líneas con los datos reales:
+En el Bloc de Notas, modificar estas tres líneas con los datos reales:
 ```
 ORION_BASE_URL=http://10.1.10.150:8080
 ADMIN_USERNAME=tu_usuario
 ADMIN_PASSWORD=tu_contraseña
 ```
 
-Guardar el archivo (Ctrl+S) y cerrar el Bloc de Notas.
+Guardar con **Ctrl+S** y cerrar el Bloc de Notas.
 
 ---
 
 ## Paso 6 — Conectarse a la VPN
 
 Conectarse a la VPN antes de ejecutar los tests.  
-Los tests se conectan al servidor Orion en la red interna — sin VPN no van a funcionar.
+Los tests se conectan al servidor Orion en la red interna — sin VPN no funcionan.
 
 ---
 
 ## Paso 7 — Ejecutar los tests
-
-Con la VPN activa y el entorno virtual activado `(venv)`, ejecutar:
 
 ```powershell
 python -m pytest tests/regression/ -v
@@ -134,14 +129,13 @@ Al finalizar muestra un resumen como este:
 57 passed in 420s (0:07:00)
 ```
 
-El reporte detallado queda en: `reports\report.html`  
-(hacer doble clic para abrirlo en el navegador)
+El reporte detallado queda en `reports\report.html` — hacer doble clic para abrirlo en el navegador.
 
 ---
 
 ## La próxima vez
 
-La instalación (pasos 1 al 5) se hace una sola vez.  
+La instalación (pasos 1 al 5) se hace **una sola vez**.  
 Las próximas veces solo hace falta:
 
 ```powershell
@@ -161,8 +155,9 @@ python -m pytest tests/regression/ -v
 
 | Error | Solución |
 |---|---|
-| `python` no se reconoce | Reinstalar Python tildando "Add to PATH" |
-| `git` no se reconoce | Cerrar y reabrir PowerShell después de instalar Git |
+| `python` no se reconoce | Cerrar y reabrir PowerShell después de instalar |
+| `git` no se reconoce | Cerrar y reabrir PowerShell después de instalar |
+| `winget` no se reconoce | Actualizar Windows desde Configuración → Windows Update |
 | Error de permisos al activar venv | Ejecutar `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` |
 | No puede conectar al servidor | Verificar que la VPN está activa |
 | Tests fallan por conteos incorrectos | El sistema Orion tiene datos distintos a los esperados |
