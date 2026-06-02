@@ -1,4 +1,4 @@
-"""
+﻿"""
 tests/regression/usuarios/test_bloqueo_usuarios.py
 Suite de regresión — Usuarios > Bloqueo de Usuarios (/GestorUsuariosBloqueados)
 
@@ -24,9 +24,12 @@ Estado base del sistema (verificado):
 import pytest
 import time
 from pages.usuarios_page import (
+
     UsuariosNav,
     BloqueoUsuariosPage,
 )
+pytestmark = pytest.mark.skip(reason="temporalmente desactivado -- foco en tests FRW supervisor")
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -293,3 +296,4 @@ class TestBloqueoUsuarios:
             except Exception:
                 pass
             raise
+

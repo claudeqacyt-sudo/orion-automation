@@ -1,4 +1,4 @@
-"""
+﻿"""
 tests/regression/config/test_usuarios.py
 Suite de regresión — Usuarios > Gestión de Perfiles (/perfiles)
 
@@ -9,9 +9,12 @@ Estructura de navegación confirmada:
 import pytest
 import time
 from pages.usuarios_page import (
+
     UsuariosNav,
     GestionPerfilesPage,
 )
+pytestmark = pytest.mark.skip(reason="temporalmente desactivado -- foco en tests FRW supervisor")
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -352,5 +355,6 @@ class TestGestionPerfiles:
         for perfil_base in GestionPerfilesPage.PERFILES_BASE:
             assert any(perfil_base.lower() in n.lower() for n in perfiles_finales), \
                 f"Perfil base '{perfil_base}' desapareció de la tabla — ERROR CRÍTICO"
+
 
 

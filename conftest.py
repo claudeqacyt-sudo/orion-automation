@@ -66,7 +66,6 @@ def logged_in_page(page: Page, base_url: str, admin_credentials: dict) -> Page:
     """
     from pages.login_page import LoginPage
     login_page = LoginPage(page)
-    page.set_viewport_size({"width": 1600, "height": 900})
 
     def _esperar_keepalive(page_ref, segundos):
         end_time = time.time() + segundos
@@ -128,9 +127,15 @@ def logged_in_page(page: Page, base_url: str, admin_credentials: dict) -> Page:
 # ─────────────────────────────────────────────
 
 @pytest.fixture(scope="session")
+def browser_type_launch_args(browser_type_launch_args):
+    """Abre el browser maximizado y con slow_mo para simular velocidad de usuario humano."""
+    return {**browser_type_launch_args, "slow_mo": 500, "args": ["--start-maximized"]}
+
+
+@pytest.fixture(scope="session")
 def shared_browser_context(browser: Browser) -> BrowserContext:
     """Contexto de browser compartido para toda la sesión de pruebas."""
-    ctx = browser.new_context(viewport={"width": 1600, "height": 900})
+    ctx = browser.new_context(no_viewport=True)  # deja que --start-maximized controle el tamaño
     yield ctx
     ctx.close()
 

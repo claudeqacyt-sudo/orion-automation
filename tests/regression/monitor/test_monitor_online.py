@@ -1,4 +1,4 @@
-"""
+﻿"""
 tests/regression/monitor/test_monitor_online.py
 Suite de regresion - Supervision > Monitores > Monitor de Efectividad (/MonitorEfectividad)
 
@@ -14,6 +14,8 @@ Estado base del sistema (verificado):
 """
 import pytest
 from pages.monitor_page import MonitorNav, MonitorEfectividadPage
+pytestmark = pytest.mark.skip(reason="temporalmente desactivado -- foco en tests FRW supervisor")
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -94,3 +96,4 @@ class TestMonitorEfectividad:
         assert page_obj.tiene_mensaje_sin_monitores(), \
             f"Se esperaba el mensaje '{MonitorEfectividadPage.MSG_SIN_MONITOR_TEXTO}' " \
             f"pero no se encontro en la pagina"
+

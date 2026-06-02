@@ -56,7 +56,13 @@ class LoginPage(BasePage):
             return self.page.locator(self.MODAL_MSG).inner_text(timeout=2000).strip()
         except Exception as e:
             err = str(e).lower()
-            if "context was destroyed" in err or "navigation" in err or "target closed" in err:
+            if (
+                "context was destroyed" in err
+                or "navigation" in err
+                or "target closed" in err
+                or "cannot find context" in err   # slow_mo: página ya navegó
+                or "specified id" in err           # variante del mismo error CDP
+            ):
                 return None  # La página está navegando → login exitoso
             raise
 

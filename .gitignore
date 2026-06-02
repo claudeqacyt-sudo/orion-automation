@@ -36,3 +36,6 @@ debug_output.txt
 # Credenciales y config local
 .env
 .claude/
+
+# Cache de datos de test (passwords generadas — nunca subir al repo)
+**/.qa_supervisor_cache.json

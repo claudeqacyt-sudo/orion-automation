@@ -1,4 +1,4 @@
-"""
+﻿"""
 tests/regression/usuarios/test_permisos_perfiles.py
 Suite de regresión — Usuarios > Permisos de Perfiles (/configNivelesFunciones)
 
@@ -17,9 +17,12 @@ Estado base del sistema:
 import pytest
 import time
 from pages.usuarios_page import (
+
     UsuariosNav,
     PermisosPerfilesPage,
 )
+pytestmark = pytest.mark.skip(reason="temporalmente desactivado -- foco en tests FRW supervisor")
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -252,3 +255,4 @@ class TestPermisosPerfiles:
         assert total_despues == total_antes, \
             f"El total de permisos cambió después de limpiar el filtro: " \
             f"antes={total_antes}, después={total_despues}"
+

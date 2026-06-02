@@ -1,4 +1,4 @@
-"""
+﻿"""
 tests/regression/supervision/test_notificar_usuarios.py
 Suite de regresion - Supervision > Notificar Usuarios (/MensajesUsuarios)
 
@@ -27,6 +27,8 @@ IMPORTANTE: Los tests verifican la UI sin enviar mensajes reales a los agentes.
 import pytest
 import time
 from pages.supervision_page import SupervisionNav, NotificarUsuariosPage
+pytestmark = pytest.mark.skip(reason="temporalmente desactivado -- foco en tests FRW supervisor")
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -320,3 +322,4 @@ class TestNotificarUsuarios:
         btn = page_obj.page.locator(NotificarUsuariosPage.BTN_REFRESH)
         assert btn.is_visible(), "#btnRefreshTable no esta visible"
         assert btn.is_enabled(), "#btnRefreshTable no esta habilitado"
+

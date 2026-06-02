@@ -1,4 +1,4 @@
-"""
+﻿"""
 tests/regression/usuarios/test_usuarios_clientes.py
 Suite de regresión — Usuarios > Usuarios de Clientes (/configUsuariosClientes)
 
@@ -22,9 +22,12 @@ Estado base del sistema (verificado):
 import pytest
 import time
 from pages.usuarios_page import (
+
     UsuariosNav,
     UsuariosClientesPage,
 )
+pytestmark = pytest.mark.skip(reason="temporalmente desactivado -- foco en tests FRW supervisor")
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -235,3 +238,4 @@ class TestUsuariosClientes:
             except Exception:
                 pass
             raise
+

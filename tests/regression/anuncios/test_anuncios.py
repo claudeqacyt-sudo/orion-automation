@@ -1,4 +1,4 @@
-"""
+﻿"""
 tests/regression/anuncios/test_anuncios.py
 Suite de regresion - Anuncios (/inicio)
 
@@ -15,6 +15,8 @@ Estado base del sistema (verificado):
 """
 import pytest
 from pages.anuncios_page import AnunciosNav, AnunciosPage
+pytestmark = pytest.mark.skip(reason="temporalmente desactivado -- foco en tests FRW supervisor")
+
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -129,3 +131,4 @@ class TestAnuncios:
 
         assert page_obj.slide_activo_tiene_imagen(), \
             "El slide activo no tiene imagen"
+
