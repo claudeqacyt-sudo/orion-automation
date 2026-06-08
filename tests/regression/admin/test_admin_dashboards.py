@@ -36,7 +36,7 @@ def _abrir_dashboard(page, hoja_id, descripcion):
     """)
     assert visible, f"'{descripcion}' no visible en menú Dashboards"
     with page.context.expect_page(timeout=12000) as info:
-        page.locator(f"#{hoja_id}").click()
+        page.evaluate(f"document.getElementById('{hoja_id}').click()")
     tab = info.value
     tab.wait_for_load_state("domcontentloaded", timeout=20000)
     try:
