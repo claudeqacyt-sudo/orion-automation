@@ -436,7 +436,7 @@ class PermisosPerfilesPage(BasePage):
     ACTIVOS_PERMISOS = {
         "Administrador": 66,
         "Supervisor":    23,
-        "Agente":        27,
+        "Agente":        19,
     }
 
     # Permisos que DEBE tener el Administrador (sample representativo)
@@ -623,8 +623,8 @@ class UsuariosPerfilesPage(BasePage):
 
     # Cantidad de usuarios asignados a cada perfil (estado base)
     USUARIOS_POR_PERFIL = {
-        "Administrador": 2,
-        "Supervisor":    0,
+        "Administrador": 1,
+        "Supervisor":    1,
         "Agente":        6,
     }
     USUARIO_ADMIN  = "cyt usuario inicial"

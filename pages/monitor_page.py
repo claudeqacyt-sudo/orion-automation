@@ -33,6 +33,8 @@ class MonitorNav:
         self.page.locator(self.MENU_SUPERVISION).wait_for(state='visible', timeout=10000)
         self.page.evaluate(f"document.querySelector('{self.MENU_SUPERVISION}').click()")
         time.sleep(1.0)
+        self.page.evaluate(f"document.querySelector('{self.MENU_MONITORES}').click()")
+        time.sleep(0.8)
 
         with self.page.context.expect_page(timeout=15000) as new_page_info:
             self.page.evaluate(

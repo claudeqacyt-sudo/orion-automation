@@ -54,7 +54,12 @@ from pages.base_page import BasePage
 # ─────────────────────────────────────────────────────────────────────────────
 
 FRAMEWORKS_PORT = 8443
-FRAMEWORKS_BASE = "https://vm-2k22-er-01.orioncontactcenter.com.ar:8443"
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
+_base = os.getenv("ORION_BASE_URL", "https://vm-2k22-er-01.orioncontactcenter.com.ar")
+FRAMEWORKS_BASE = f"{_base.rstrip('/')}:{FRAMEWORKS_PORT}"
 
 NIVEL_ADMINISTRADOR = "1"
 NIVEL_SUPERVISOR    = "2"
@@ -113,16 +118,15 @@ class FrameworksNav:
 
     def open_gestion_usuarios(self, timeout: int = 20000) -> "GestionUsuariosPage":
         """
-        Abre Frameworks y navega directamente a Gestion de Usuarios.
-        Devuelve una instancia de GestionUsuariosPage lista para usar.
+        Abre Frameworks via menú y navega a Gestión de Usuarios via link interno.
+        No usa URL directa — sigue el link a usuarios.aspx que está en la página cargada.
         """
         tab = self.open_frameworks(timeout=timeout)
-        # Navegar directamente a la URL conocida de Gestion de Usuarios
-        tab.goto(
-            f"{FRAMEWORKS_BASE}/usuarios.aspx",
-            wait_until="domcontentloaded",
-            timeout=20000
-        )
+        # El link a usuarios.aspx está en un menú hover — usar JS click para bypasear visibilidad
+        tab.wait_for_load_state("domcontentloaded", timeout=20000)
+        time.sleep(1.0)
+        tab.evaluate("document.querySelector(\"a[href*='usuarios.aspx']\").click()")
+        tab.wait_for_load_state("domcontentloaded", timeout=20000)
         time.sleep(1.5)
         page_obj = GestionUsuariosPage(tab)
         page_obj.wait_for_load()

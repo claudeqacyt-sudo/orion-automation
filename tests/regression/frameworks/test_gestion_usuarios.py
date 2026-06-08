@@ -42,6 +42,8 @@ import time
 from pathlib import Path
 
 import pytest
+
+pytestmark = [pytest.mark.regression, pytest.mark.supervisor]
 from pages.frameworks_page import (
     FrameworksNav,
     GestionUsuariosPage,

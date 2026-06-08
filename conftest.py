@@ -53,6 +53,14 @@ def supervisor_credentials() -> dict:
     }
 
 
+@pytest.fixture(scope="session")
+def agent_credentials() -> dict:
+    return {
+        "username": os.getenv("AGENT_USERNAME", "1001"),
+        "password": os.getenv("AGENT_PASSWORD", "1001"),
+    }
+
+
 # ─────────────────────────────────────────────
 # Fixture per-test (SMOKE tests)
 # ─────────────────────────────────────────────
@@ -128,8 +136,9 @@ def logged_in_page(page: Page, base_url: str, admin_credentials: dict) -> Page:
 
 @pytest.fixture(scope="session")
 def browser_type_launch_args(browser_type_launch_args):
-    """Abre el browser maximizado y con slow_mo para simular velocidad de usuario humano."""
-    return {**browser_type_launch_args, "slow_mo": 500, "args": ["--start-maximized"]}
+    """Abre el browser maximizado. slow_mo se toma de SLOW_MO en .env (default 0)."""
+    slow_mo = int(os.getenv("SLOW_MO", "500"))
+    return {**browser_type_launch_args, "slow_mo": slow_mo, "args": ["--start-maximized"]}
 
 
 @pytest.fixture(scope="session")
