@@ -15,10 +15,6 @@ Estado base del sistema (verificado):
 """
 import pytest
 from pages.anuncios_page import AnunciosNav, AnunciosPage
-pytestmark = pytest.mark.skip(reason="temporalmente desactivado -- foco en tests FRW supervisor")
-
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Fixture de seccion
 # ─────────────────────────────────────────────────────────────────────────────

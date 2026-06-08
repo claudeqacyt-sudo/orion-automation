@@ -1017,8 +1017,8 @@ class BloqueoUsuariosPage(BasePage):
 
     def wait_for_load(self):
         """Espera a que el panel de filtros y la lista de activos estén visibles."""
-        self.page.locator(self.SELECT_CLIENTE).wait_for(state="visible", timeout=self.timeout)
-        self.page.locator(self.LISTA_ACTIVOS).wait_for(state="visible", timeout=self.timeout)
+        self.page.locator(self.SELECT_CLIENTE).wait_for(state="visible", timeout=45000)
+        self.page.locator(self.LISTA_ACTIVOS).wait_for(state="visible", timeout=45000)
         time.sleep(1)
 
     def verify_page_loaded(self):

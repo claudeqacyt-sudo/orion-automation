@@ -26,10 +26,6 @@ from pages.usuarios_page import (
     UsuariosNav,
     UsuariosClientesPage,
 )
-pytestmark = pytest.mark.skip(reason="temporalmente desactivado -- foco en tests FRW supervisor")
-
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Fixture de sección — abre la pestaña UNA VEZ para toda la clase
 # ─────────────────────────────────────────────────────────────────────────────
