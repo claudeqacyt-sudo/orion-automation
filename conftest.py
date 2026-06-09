@@ -249,6 +249,6 @@ def pytest_runtest_makereport(item, call):
             test_name = item.name.replace("/", "_").replace(" ", "_")
             path = f"reports/screenshots/FAIL_{test_name}.png"
             try:
-                page.screenshot(path=path, full_page=True)
+                page.screenshot(path=path, full_page=True, timeout=5000)
             except Exception:
                 pass
