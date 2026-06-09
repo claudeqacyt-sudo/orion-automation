@@ -100,7 +100,7 @@ notepad .env
 
 En el Bloc de Notas, modificar estas tres líneas con los datos reales:
 ```
-ORION_BASE_URL=https://vm-2k22-er-01.orioncontactcenter.com.ar
+ORION_BASE_URL=https://vm-2k22-fg-01.orioncontactcenter.com.ar
 ADMIN_USERNAME=tu_usuario
 ADMIN_PASSWORD=tu_contraseña
 ```

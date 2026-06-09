@@ -50,7 +50,7 @@ copy .env.example .env
 Abrir el archivo `.env` y completar:
 
 ```
-ORION_BASE_URL=https://vm-2k22-er-01.orioncontactcenter.com.ar   # URL del servidor Orion
+ORION_BASE_URL=https://vm-2k22-fg-01.orioncontactcenter.com.ar   # URL del servidor Orion
 ADMIN_USERNAME=cyt                        # Usuario administrador
 ADMIN_PASSWORD=tu_password                # Contraseña
 ```

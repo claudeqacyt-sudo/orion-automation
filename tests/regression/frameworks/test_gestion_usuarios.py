@@ -3,7 +3,7 @@ tests/regression/frameworks/test_gestion_usuarios.py
 Suite de regresion — Frameworks > Configurar > Usuarios > Gestion de Usuarios
 
 Modulo: Orion Contact Center (Frameworks) — puerto 8443
-URL directa: https://vm-2k22-er-01.orioncontactcenter.com.ar:8443/usuarios.aspx
+URL directa: https://vm-2k22-fg-01.orioncontactcenter.com.ar:8443/usuarios.aspx
 
 Arquitectura de fixtures:
   supervisor_qa      (scope=module) — crea QASupervisor UNA VEZ para todo el modulo,

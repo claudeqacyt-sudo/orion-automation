@@ -1,6 +1,6 @@
 """
 monitor_page.py - Page Object para el modulo Monitor / Supervision de Orion Contact Center
-Selectores verificados contra HTML real de Orion v7.0 (vm-2k22-er-01.orioncontactcenter.com.ar)
+Selectores verificados contra HTML real de Orion v7.0 (vm-2k22-fg-01.orioncontactcenter.com.ar)
 
 Ruta de navegacion en el menu:
   Supervision (accionEjecutar_4)

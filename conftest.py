@@ -34,7 +34,7 @@ SESSION_WAIT_SECS = 140  # Espera cuando hay sesión activa en el servidor
 
 @pytest.fixture(scope="session")
 def base_url() -> str:
-    return os.getenv("ORION_BASE_URL", "https://vm-2k22-er-01.orioncontactcenter.com.ar")
+    return os.getenv("ORION_BASE_URL", "https://vm-2k22-fg-01.orioncontactcenter.com.ar")
 
 
 @pytest.fixture(scope="session")

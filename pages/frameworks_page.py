@@ -1,6 +1,6 @@
 """
 frameworks_page.py — Page Objects para el modulo Frameworks (Orion Contact Center)
-URL base del modulo: https://vm-2k22-er-01.orioncontactcenter.com.ar:8443
+URL base del modulo: https://vm-2k22-fg-01.orioncontactcenter.com.ar:8443
 Tecnologia: ASP.NET WebForms (puerto 8443, session separada del gestor principal)
 
 Arquitectura:
@@ -12,10 +12,10 @@ Navegacion verificada:
      - Click #accionEjecutar_4 (Supervision) → dropdown
      - Click #accionEjecutar_44 (Orion Contact Center) → abre nueva pestana en :8443
   2. Dentro del modulo:
-     - URL directa: https://vm-2k22-er-01.orioncontactcenter.com.ar:8443/usuarios.aspx
+     - URL directa: https://vm-2k22-fg-01.orioncontactcenter.com.ar:8443/usuarios.aspx
      - Via menu hover: Configurar (cy=116) > Usuarios (cy=168) > Gestion de usuarios (cy=168 en sub-menu)
 
-Selectores verificados contra HTML real de Orion v7.0 (vm-2k22-er-01..., puerto 8443):
+Selectores verificados contra HTML real de Orion v7.0 (vm-2k22-fg-01..., puerto 8443):
   Pagina: usuarios.aspx
     Panel Filtro:
       #ctl00_phContent_txtFechaDesde        — Fecha Desde
@@ -58,7 +58,7 @@ FRAMEWORKS_PORT = 8443
 import os
 from dotenv import load_dotenv
 load_dotenv()
-_base = os.getenv("ORION_BASE_URL", "https://vm-2k22-er-01.orioncontactcenter.com.ar")
+_base = os.getenv("ORION_BASE_URL", "https://vm-2k22-fg-01.orioncontactcenter.com.ar")
 FRAMEWORKS_BASE = f"{_base.rstrip('/')}:{FRAMEWORKS_PORT}"
 
 NIVEL_ADMINISTRADOR = "1"
@@ -140,7 +140,7 @@ class FrameworksNav:
 class GestionUsuariosPage(BasePage):
     """
     Page Object para Gestion de Usuarios del modulo Frameworks.
-    URL: https://vm-2k22-er-01.orioncontactcenter.com.ar:8443/usuarios.aspx
+    URL: https://vm-2k22-fg-01.orioncontactcenter.com.ar:8443/usuarios.aspx
 
     La pagina combina:
       - Panel de filtros (izquierda)
