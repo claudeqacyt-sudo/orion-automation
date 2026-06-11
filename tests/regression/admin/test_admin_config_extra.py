@@ -17,12 +17,27 @@ from playwright.sync_api import expect
 pytestmark = [pytest.mark.regression, pytest.mark.admin]
 
 
+def _esperar_menu_visible(page, element_id: str, timeout: int = 5000) -> None:
+    try:
+        page.wait_for_function(
+            f"""() => {{
+                const el = document.getElementById('{element_id}');
+                if (!el) return false;
+                const r = el.getBoundingClientRect();
+                return r.width > 0 && r.height > 0;
+            }}""",
+            timeout=timeout
+        )
+    except Exception:
+        pass
+
+
 def _preparar_menu(page, abuelo, padre, hoja_id) -> bool:
     page.locator(f"#{abuelo}").click()
-    time.sleep(1.0)
     if padre:
+        _esperar_menu_visible(page, padre)
         page.locator(f"#{padre}").click()
-        time.sleep(1.0)
+    _esperar_menu_visible(page, hoja_id)
     return page.evaluate(f"""
         () => {{
             const el = document.getElementById('{hoja_id}');

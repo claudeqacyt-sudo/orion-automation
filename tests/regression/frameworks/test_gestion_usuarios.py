@@ -362,6 +362,21 @@ class TestSupervisorAcceso:
             }}
         """)
 
+    @staticmethod
+    def _esperar_menu_visible(page, element_id: str, timeout: int = 5000) -> None:
+        try:
+            page.wait_for_function(
+                f"""() => {{
+                    const el = document.getElementById('{element_id}');
+                    if (!el) return false;
+                    const r = el.getBoundingClientRect();
+                    return r.width > 0 && r.height > 0;
+                }}""",
+                timeout=timeout
+            )
+        except Exception:
+            pass
+
     def _preparar_menu(self, page, abuelo: str, padre: str, hoja_id: str) -> bool:
         """
         Navega el menu para que hoja_id sea visible y clickeable.
@@ -375,13 +390,13 @@ class TestSupervisorAcceso:
 
         # Click nativo en abuelo (accionEjecutar_2) — siempre, para resetear el estado
         page.locator(f"#{abuelo}").click()
-        time.sleep(1.0)
 
         # Click nativo en padre directo
         if padre:
+            self._esperar_menu_visible(page, padre)
             page.locator(f"#{padre}").click()
-            time.sleep(1.0)
 
+        self._esperar_menu_visible(page, hoja_id)
         return self._hoja_en_viewport(page, hoja_id)
 
     @staticmethod
