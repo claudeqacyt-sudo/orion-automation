@@ -25,7 +25,7 @@ from playwright.sync_api import Page, Browser, BrowserContext
 
 load_dotenv()
 
-SESSION_WAIT_SECS = 140  # Espera cuando hay sesión activa en el servidor
+SESSION_WAIT_SECS = 160  # Espera cuando hay sesión activa en el servidor
 
 
 # ─────────────────────────────────────────────
@@ -145,8 +145,19 @@ def browser_type_launch_args(browser_type_launch_args):
 def shared_browser_context(browser: Browser) -> BrowserContext:
     """Contexto de browser compartido para toda la sesión de pruebas."""
     ctx = browser.new_context(no_viewport=True)  # deja que --start-maximized controle el tamaño
-    # Impide que el app de Orion cierre la ventana al detectar expiración de sesión.
-    ctx.add_init_script("window.close = () => {};")
+    # Impide que el app de Orion cierre ventanas/tabs al detectar expiración de sesión.
+    # Object.defineProperty hace window.close no-sobrescribible por los scripts del app.
+    ctx.add_init_script("""
+        try {
+            Object.defineProperty(window, 'close', {
+                value: function() {},
+                writable: false,
+                configurable: false
+            });
+        } catch(e) {
+            window.close = function() {};
+        }
+    """)
     yield ctx
     ctx.close()
 
@@ -210,7 +221,7 @@ def shared_page(shared_browser_context: BrowserContext,
             pass
         return False
 
-    for attempt in range(3):
+    for attempt in range(5):
         login_page.navigate(base_url)
         try:
             login_page.login(admin_credentials["username"], admin_credentials["password"])
@@ -218,14 +229,14 @@ def shared_page(shared_browser_context: BrowserContext,
             break
         except RuntimeError as e:
             # login() detectó el modal de sesión activa directamente
-            if "Sesión activa" in str(e) and attempt < 2:
+            if "Sesión activa" in str(e) and attempt < 4:
                 print(f"\n[shared_page] Sesión activa vía RuntimeError (intento {attempt + 1}).")
                 _esperar_con_keepalive(SESSION_WAIT_SECS)
             else:
                 pytest.exit(f"No se pudo iniciar sesión compartida: {e}", returncode=1)
         except Exception as e:
             # verify_logged_in() u otro error — verificar si hay modal de sesión activa
-            if attempt < 2 and _sesion_activa_en_pagina():
+            if attempt < 4 and _sesion_activa_en_pagina():
                 print(f"\n[shared_page] Sesión activa detectada post-login (intento {attempt + 1}).")
                 _esperar_con_keepalive(SESSION_WAIT_SECS)
             else:

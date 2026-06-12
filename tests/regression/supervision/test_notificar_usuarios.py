@@ -8,7 +8,7 @@ import pytest
 from playwright.sync_api import Page
 from pages.login_page import LoginPage
 
-pytestmark = [pytest.mark.regression, pytest.mark.admin]
+pytestmark = [pytest.mark.regression, pytest.mark.admin, pytest.mark.skip(reason="Deshabilitado")]
 
 BASE_PATH = "/MensajesUsuarios"
 

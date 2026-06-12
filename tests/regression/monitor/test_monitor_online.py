@@ -64,8 +64,21 @@ def _body(tab):
 @pytest.fixture(scope="class")
 def monitor_tab(shared_page, base_url, admin_credentials):
     tab = _abrir_monitor(shared_page, base_url, admin_credentials)
+    # Si el tab se cerró solo (el app llama window.close() durante la carga),
+    # reintentamos una vez más.
+    try:
+        tab.evaluate("1")
+    except Exception:
+        try:
+            tab.close()
+        except Exception:
+            pass
+        tab = _abrir_monitor(shared_page, base_url, admin_credentials)
     yield tab
-    tab.close()
+    try:
+        tab.close()
+    except Exception:
+        pass
 
 
 class TestMonitorEfectividad:
