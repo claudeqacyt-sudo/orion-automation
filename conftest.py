@@ -248,10 +248,11 @@ def shared_page(shared_browser_context: BrowserContext,
 
 # Referencia global al contexto compartido para el hook de keepalive.
 # El servidor de Orion expira la sesión tras 130s de inactividad.
-# context.request.get() es sincrónico y usa las cookies del browser —
-# garantiza que el servidor reciba el request y resetee el timer de sesión.
+# Usamos context.request.fetch(HEAD) — sincrónico, usa cookies del browser,
+# no descarga body. Solo se llama 1 vez cada 60 segundos para minimizar overhead.
 _shared_context_keepalive = None
 _shared_page_base_url = None
+_last_keepalive_time: float = 0.0
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -265,16 +266,20 @@ def _register_keepalive(shared_browser_context, base_url):
 
 
 def pytest_runtest_logreport(report):
-    """GET request real al servidor tras cada fase de test para mantener viva la sesión cyt."""
-    if _shared_context_keepalive is not None and _shared_page_base_url:
-        try:
-            _shared_context_keepalive.request.get(
-                f"{_shared_page_base_url}/admincontactos",
-                timeout=5000,
-                fail_on_status_code=False,
-            )
-        except Exception:
-            pass
+    """HEAD request al servidor (máx 1/60s) para mantener viva la sesión cyt."""
+    global _last_keepalive_time
+    if report.when == "call" and _shared_context_keepalive is not None and _shared_page_base_url:
+        now = time.time()
+        if now - _last_keepalive_time >= 60:
+            _last_keepalive_time = now
+            try:
+                _shared_context_keepalive.request.get(
+                    f"{_shared_page_base_url}/admincontactos",
+                    timeout=3000,
+                    fail_on_status_code=False,
+                )
+            except Exception:
+                pass
 
 
 # ─────────────────────────────────────────────
