@@ -140,7 +140,7 @@ def supervisor_qa(shared_page, base_url, admin_credentials):
 
         fw.page.close()
     except Exception as e:
-        pytest.skip(f"No se pudo preparar QASupervisor — se omiten todos los tests del modulo: {e}")
+        pytest.fail(f"No se pudo preparar QASupervisor: {e}")
 
     yield {
         "nombre":    NOMBRE,
