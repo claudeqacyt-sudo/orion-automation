@@ -26,15 +26,31 @@ _VERIFICADORES = {
 }
 
 
+def _esperar_visible(page, element_id: str, timeout: int = 8000) -> None:
+    """Espera activamente a que el elemento sea visible por bbox (sin Playwright visibility check)."""
+    try:
+        page.wait_for_function(
+            f"""() => {{
+                const el = document.getElementById('{element_id}');
+                if (!el) return false;
+                const r = el.getBoundingClientRect();
+                return r.width > 0 && r.height > 0;
+            }}""",
+            timeout=timeout,
+        )
+    except Exception:
+        pass
+
+
 def _preparar_menu(page, abuelo, padre, hoja_id) -> bool:
     """Expande el menú accordion para que hoja_id sea clickeable."""
     if abuelo is None:
         return True
     page.evaluate(f"() => document.getElementById('{abuelo}')?.click()")
-    time.sleep(1.2)
     if padre:
+        _esperar_visible(page, padre)
         page.evaluate(f"() => document.getElementById('{padre}')?.click()")
-        time.sleep(1.2)
+    _esperar_visible(page, hoja_id)
     return page.evaluate(f"""
         () => {{
             const el = document.getElementById('{hoja_id}');
