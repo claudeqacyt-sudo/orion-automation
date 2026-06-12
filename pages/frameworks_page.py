@@ -99,11 +99,22 @@ class FrameworksNav:
         # Esperar que el menu este listo
         self.page.locator(self.MENU_SUPERVISION).wait_for(state="visible", timeout=timeout)
 
-        # Abrir dropdown
+        # Abrir dropdown y esperar que accionEjecutar_44 sea visible
         self.page.evaluate(
             f"document.querySelector('{self.MENU_SUPERVISION}').click()"
         )
-        time.sleep(1.2)
+        try:
+            self.page.wait_for_function(
+                f"""() => {{
+                    const el = document.querySelector('{self.MENU_ORION_CC}');
+                    if (!el) return false;
+                    const r = el.getBoundingClientRect();
+                    return r.width > 0 && r.height > 0;
+                }}""",
+                timeout=5000
+            )
+        except Exception:
+            pass
 
         # Abrir Orion Contact Center → nueva pestana
         with self.page.context.expect_page(timeout=15000) as new_page_info:

@@ -9,11 +9,37 @@ La pestana debe abrirse via click en el menu Angular (no goto directo).
 """
 import time
 import pytest
+from pages.login_page import LoginPage
 
 pytestmark = [pytest.mark.regression, pytest.mark.admin]
 
 
-def _abrir_monitor(page):
+def _restaurar_sesion(page, base_url, credentials):
+    """Navega a admincontactos y re-loguea si la sesión expiró."""
+    try:
+        page.goto(f"{base_url}/admincontactos", wait_until="commit", timeout=10000)
+    except Exception:
+        pass
+    if "/login" in page.url or "login" in page.url.lower():
+        try:
+            login = LoginPage(page)
+            login.navigate(base_url)
+            login.login(credentials["username"], credentials["password"])
+        except Exception:
+            pass
+        try:
+            page.goto(f"{base_url}/admincontactos", wait_until="commit", timeout=10000)
+        except Exception:
+            pass
+        time.sleep(2)
+    try:
+        page.locator("#accionEjecutar_4").wait_for(state="visible", timeout=20000)
+    except Exception:
+        pass
+
+
+def _abrir_monitor(page, base_url, credentials):
+    _restaurar_sesion(page, base_url, credentials)
     page.locator("#accionEjecutar_4").wait_for(state="visible", timeout=15000)
     page.evaluate("document.getElementById('accionEjecutar_4').click()")
     time.sleep(1.5)
@@ -36,8 +62,8 @@ def _body(tab):
 
 
 @pytest.fixture(scope="class")
-def monitor_tab(shared_page):
-    tab = _abrir_monitor(shared_page)
+def monitor_tab(shared_page, base_url, admin_credentials):
+    tab = _abrir_monitor(shared_page, base_url, admin_credentials)
     yield tab
     tab.close()
 

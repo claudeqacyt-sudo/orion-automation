@@ -106,6 +106,13 @@ def supervisor_qa(shared_page, base_url, admin_credentials):
 
     # ── SETUP ────────────────────────────────────────────────────────────────
     try:
+        # Asegurar estado limpio en admincontactos antes de navegar a Frameworks
+        try:
+            shared_page.goto(f"{base_url}/admincontactos", wait_until="commit", timeout=10000)
+            shared_page.locator("#accionEjecutar_4").wait_for(state="visible", timeout=15000)
+        except Exception:
+            pass
+
         nav = FrameworksNav(shared_page)
         fw  = nav.open_gestion_usuarios()
 
@@ -169,38 +176,34 @@ def gestion_tab(shared_page):
 # ─────────────────────────────────────────────────────────────────────────────
 
 @pytest.fixture(scope="class")
-def supervisor_logueado(supervisor_qa, shared_page, base_url, admin_credentials):
+def supervisor_logueado(supervisor_qa, supervisor_browser_context, base_url):
     """
-    Hace login como QASupervisor una sola vez para toda la clase TestSupervisorAcceso.
-    Al finalizar la clase: logout supervisor → login cyt (restaura sesion para teardown
-    de supervisor_qa).
+    Login como QASupervisor en contexto separado, una sola vez para TestSupervisorAcceso.
+    La sesión cyt en shared_page nunca se interrumpe.
 
-    Yields: shared_page (ya autenticado como supervisor, menu visible)
+    Yields: page autenticada como supervisor (contexto propio)
     """
-    login = LoginPage(shared_page)
+    page = supervisor_browser_context.new_page()
+    login = LoginPage(page)
 
-    # Logout cyt
-    login.logout()
-    time.sleep(1.5)
-
-    # Login como supervisor
     login.navigate(base_url)
     login.login(supervisor_qa["nombre"], supervisor_qa["password"])
 
     # Esperar que el SPA renderice el menu
-    shared_page.locator("#accionEjecutar_2").wait_for(state="visible", timeout=10000)
+    page.locator("#accionEjecutar_2").wait_for(state="visible", timeout=10000)
 
-    yield shared_page  # sesion activa como supervisor
+    yield page
 
-    # Teardown: logout supervisor, login cyt
+    # Teardown: logout supervisor, cerrar página. cyt sigue activo en shared_page.
     try:
         login.logout()
         time.sleep(1.5)
     except Exception:
         pass
-    login.navigate(base_url)
-    login.login(admin_credentials["username"], admin_credentials["password"])
-    login.verify_logged_in()
+    try:
+        page.close()
+    except Exception:
+        pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -145,6 +145,26 @@ def browser_type_launch_args(browser_type_launch_args):
 def shared_browser_context(browser: Browser) -> BrowserContext:
     """Contexto de browser compartido para toda la sesión de pruebas."""
     ctx = browser.new_context(no_viewport=True)  # deja que --start-maximized controle el tamaño
+    # Impide que el app de Orion cierre la ventana al detectar expiración de sesión.
+    ctx.add_init_script("window.close = () => {};")
+    yield ctx
+    ctx.close()
+
+
+@pytest.fixture(scope="session")
+def agent_browser_context(browser: Browser) -> BrowserContext:
+    """Contexto de browser separado para la sesión del agente (1001).
+    La sesión admin (cyt) en shared_page nunca se interrumpe."""
+    ctx = browser.new_context(no_viewport=True)
+    yield ctx
+    ctx.close()
+
+
+@pytest.fixture(scope="session")
+def supervisor_browser_context(browser: Browser) -> BrowserContext:
+    """Contexto de browser separado para la sesión del supervisor.
+    La sesión admin (cyt) en shared_page nunca se interrumpe."""
+    ctx = browser.new_context(no_viewport=True)
     yield ctx
     ctx.close()
 
@@ -223,6 +243,41 @@ def shared_page(shared_browser_context: BrowserContext,
 
 
 # ─────────────────────────────────────────────
+# Keepalive de sesión compartida
+# ─────────────────────────────────────────────
+
+# Referencia global al contexto compartido para el hook de keepalive.
+# El servidor de Orion expira la sesión tras 130s de inactividad.
+# context.request.get() es sincrónico y usa las cookies del browser —
+# garantiza que el servidor reciba el request y resetee el timer de sesión.
+_shared_context_keepalive = None
+_shared_page_base_url = None
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _register_keepalive(shared_browser_context, base_url):
+    global _shared_context_keepalive, _shared_page_base_url
+    _shared_context_keepalive = shared_browser_context
+    _shared_page_base_url = base_url
+    yield
+    _shared_context_keepalive = None
+    _shared_page_base_url = None
+
+
+def pytest_runtest_logreport(report):
+    """GET request real al servidor tras cada fase de test para mantener viva la sesión cyt."""
+    if _shared_context_keepalive is not None and _shared_page_base_url:
+        try:
+            _shared_context_keepalive.request.get(
+                f"{_shared_page_base_url}/admincontactos",
+                timeout=5000,
+                fail_on_status_code=False,
+            )
+        except Exception:
+            pass
+
+
+# ─────────────────────────────────────────────
 # Hooks de pytest
 # ─────────────────────────────────────────────
 
@@ -244,7 +299,9 @@ def pytest_runtest_makereport(item, call):
     if report.when == "call" and report.failed:
         page: Page = (item.funcargs.get("page")
                       or item.funcargs.get("logged_in_page")
-                      or item.funcargs.get("shared_page"))
+                      or item.funcargs.get("shared_page")
+                      or item.funcargs.get("agent_logueado")
+                      or item.funcargs.get("supervisor_logueado"))
         if page:
             test_name = item.name.replace("/", "_").replace(" ", "_")
             path = f"reports/screenshots/FAIL_{test_name}.png"

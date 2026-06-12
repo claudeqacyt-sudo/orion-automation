@@ -28,20 +28,17 @@ URL_AGENTE = "/ingresoInterno"
 # ─────────────────────────────────────────────────────────────────────────────
 
 @pytest.fixture(scope="module")
-def agent_logueado(shared_page: Page, base_url: str,
-                   agent_credentials: dict, admin_credentials: dict):
-    login = LoginPage(shared_page)
-
-    # Logout admin
-    login.logout()
-    time.sleep(1.5)
+def agent_logueado(agent_browser_context, base_url: str, agent_credentials: dict):
+    """Login único como agente en contexto separado. La sesión cyt en shared_page no se toca."""
+    page = agent_browser_context.new_page()
+    login = LoginPage(page)
 
     # Login agente con retry si hay sesión activa
     for attempt in range(3):
         try:
             login.navigate(base_url)
             login.login(agent_credentials["username"], agent_credentials["password"])
-            shared_page.wait_for_url(f"**{URL_AGENTE}**", timeout=15000)
+            page.wait_for_url(f"**{URL_AGENTE}**", timeout=15000)
             break
         except RuntimeError:
             print(f"\n[agent_logueado] Sesión activa (intento {attempt+1}), esperando 140s...")
@@ -50,44 +47,45 @@ def agent_logueado(shared_page: Page, base_url: str,
             pytest.exit(f"No se pudo iniciar sesión como agente: {e}", returncode=1)
 
     # Esperar y verificar modal de extensión
-    modal = shared_page.locator("#modalGlobal2Botones")
+    modal = page.locator("#modalGlobal2Botones")
     modal.wait_for(state="visible", timeout=8000)
 
     # Habilitar canales de comunicación: click en #conBarra
-    con_barra = shared_page.locator("#conBarra")
+    con_barra = page.locator("#conBarra")
     con_barra.wait_for(state="visible", timeout=5000)
     if not con_barra.is_checked():
         con_barra.click()
         time.sleep(0.8)
 
     # Al tildar #conBarra se habilita el campo de extensión — ingresar 201
-    shared_page.locator("#txtNroInterno").wait_for(state="visible", timeout=5000)
-    shared_page.locator("#txtNroInterno").fill("201")
+    page.locator("#txtNroInterno").wait_for(state="visible", timeout=5000)
+    page.locator("#txtNroInterno").fill("201")
     time.sleep(0.5)
 
     # Continuar
-    shared_page.locator("#modalGlobal2Botones_uno").click()
+    page.locator("#modalGlobal2Botones_uno").click()
 
     # Esperar carga completa: red idle + interfaz interactiva
     try:
-        shared_page.wait_for_load_state("networkidle", timeout=20000)
+        page.wait_for_load_state("networkidle", timeout=20000)
     except Exception:
         pass
-    shared_page.locator("#bienvenida").wait_for(state="visible", timeout=15000)
-    shared_page.locator(".module-button").first.wait_for(state="visible", timeout=10000)
+    page.locator("#bienvenida").wait_for(state="visible", timeout=15000)
+    page.locator(".module-button").first.wait_for(state="visible", timeout=10000)
     time.sleep(2)
 
-    yield shared_page
+    yield page
 
-    # Teardown: logout agente → login admin
+    # Teardown: logout agente, cerrar página. cyt sigue activo en shared_page.
     try:
         login.logout()
         time.sleep(1.5)
     except Exception:
         pass
-    login.navigate(base_url)
-    login.login(admin_credentials["username"], admin_credentials["password"])
-    login.verify_logged_in()
+    try:
+        page.close()
+    except Exception:
+        pass
 
 
 # ─────────────────────────────────────────────────────────────────────────────
