@@ -30,11 +30,11 @@ def _preparar_menu(page, abuelo, padre, hoja_id) -> bool:
     """Expande el menú accordion para que hoja_id sea clickeable."""
     if abuelo is None:
         return True
-    page.locator(f"#{abuelo}").click()
-    time.sleep(1.0)
+    page.evaluate(f"() => document.getElementById('{abuelo}')?.click()")
+    time.sleep(1.2)
     if padre:
-        page.locator(f"#{padre}").click()
-        time.sleep(1.0)
+        page.evaluate(f"() => document.getElementById('{padre}')?.click()")
+        time.sleep(1.2)
     return page.evaluate(f"""
         () => {{
             const el = document.getElementById('{hoja_id}');
