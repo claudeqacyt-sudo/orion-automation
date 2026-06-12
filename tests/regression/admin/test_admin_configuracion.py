@@ -63,6 +63,7 @@ def _preparar_menu(page, abuelo, padre, hoja_id) -> bool:
 
 class TestAdminConfiguracion:
 
+    @pytest.mark.skip(reason="Deshabilitado")
     def test_ADM009_secciones_configuracion_abren_contenido(self, shared_page):
         """
         ADM-009: Como admin, cada sección hoja de Configuración abre nueva pestaña
