@@ -106,12 +106,31 @@ def supervisor_qa(shared_page, base_url, admin_credentials):
 
     # ── SETUP ────────────────────────────────────────────────────────────────
     try:
-        # Asegurar estado limpio en admincontactos antes de navegar a Frameworks
-        try:
-            shared_page.goto(f"{base_url}/admincontactos", wait_until="commit", timeout=10000)
-            shared_page.locator("#accionEjecutar_4").wait_for(state="visible", timeout=15000)
-        except Exception:
-            pass
+        # Restaurar sesión cyt antes de navegar a Frameworks.
+        # Después de los tests ADM/AGT, shared_page puede estar en una URL
+        # diferente o la sesión puede haber expirado.
+        for _intento in range(3):
+            try:
+                shared_page.goto(f"{base_url}/admincontactos",
+                                 wait_until="load", timeout=20000)
+            except Exception:
+                pass
+            if "/login" in shared_page.url:
+                # Sesión expirada — reloguear
+                from pages.login_page import LoginPage as _LP
+                _lp = _LP(shared_page)
+                try:
+                    _lp.navigate(base_url)
+                    _lp.login(admin_credentials["username"], admin_credentials["password"])
+                except Exception:
+                    pass
+                time.sleep(2)
+            try:
+                shared_page.locator("#accionEjecutar_4").wait_for(
+                    state="visible", timeout=15000)
+                break  # menú visible → listo
+            except Exception:
+                time.sleep(3)
 
         nav = FrameworksNav(shared_page)
         fw  = nav.open_gestion_usuarios()
