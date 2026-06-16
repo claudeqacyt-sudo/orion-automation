@@ -235,11 +235,7 @@ class TestSupervisorCreacion:
     # ── FRW-001-A ─────────────────────────────────────────────────────────────
 
     def test_FRW001_A_password_generada_correctamente(self, supervisor_qa):
-        """
-        FRW-001-A: Al crear el supervisor el sistema genera una password aleatoria
-        visible en #lblPasswordRandom con el formato esperado.
-        Formato: "Se inicializo la clave, la misma es: XXXXXXXX"
-        """
+        """FRW-001-A: [Admin cyt] Creacion de Supervisor — el sistema genera password aleatoria visible en #lblPasswordRandom."""
         lbl      = supervisor_qa["lbl_texto"]
         password = supervisor_qa["password"]
 
@@ -264,10 +260,7 @@ class TestSupervisorCreacion:
     # ── FRW-001-B ─────────────────────────────────────────────────────────────
 
     def test_FRW001_B_usuario_aparece_en_grid(self, supervisor_qa, gestion_tab):
-        """
-        FRW-001-B: El usuario QASupervisor aparece en el grid de Gestion de Usuarios
-        inmediatamente despues de la creacion.
-        """
+        """FRW-001-B: [Admin cyt] Creacion de Supervisor — QASupervisor aparece en el grid de Gestion de Usuarios."""
         assert gestion_tab.usuario_existe_en_grid(supervisor_qa["nombre"]), \
             f"El usuario '{supervisor_qa['nombre']}' no aparece en el grid — " \
             "la creacion pudo haber fallado silenciosamente"
@@ -315,20 +308,14 @@ class TestSupervisorAcceso:
     # ── FRW-001-C ─────────────────────────────────────────────────────────────
 
     def test_FRW001_C_login_exitoso(self, supervisor_logueado):
-        """
-        FRW-001-C: El usuario QASupervisor puede iniciar sesion en el sistema.
-        Verifica que tras el login la URL contiene /admincontactos.
-        """
+        """FRW-001-C: [Perfil Supervisor] Login — QASupervisor puede iniciar sesion y llega a /admincontactos."""
         assert LoginPage.URL_POST_LOGIN in supervisor_logueado.url, \
             f"Login del supervisor fallo — URL inesperada: {supervisor_logueado.url}"
 
     # ── FRW-001-D ─────────────────────────────────────────────────────────────
 
     def test_FRW001_D_menu_items_correctos(self, supervisor_logueado):
-        """
-        FRW-001-D: El perfil Supervisor muestra exactamente los 12 items de menu
-        que le corresponden — todos visibles en el DOM.
-        """
+        """FRW-001-D: [Perfil Supervisor] Menu — los 12 items de menu del Supervisor estan visibles en el DOM."""
         page = supervisor_logueado
         for item_id, descripcion in self.MENU_ESPERADO:
             visible = page.evaluate(f"""
@@ -344,10 +331,7 @@ class TestSupervisorAcceso:
     # ── FRW-001-E ─────────────────────────────────────────────────────────────
 
     def test_FRW001_E_menu_admin_bloqueado(self, supervisor_logueado):
-        """
-        FRW-001-E: Los items exclusivos del Administrador NO existen en el DOM
-        del Supervisor — no hay escalada de privilegios en el menu.
-        """
+        """FRW-001-E: [Perfil Supervisor] Seguridad — los items exclusivos de Administrador no estan disponibles para el Supervisor."""
         page = supervisor_logueado
         for item_id, descripcion in self.MENU_BLOQUEADO:
             existe = page.evaluate(f"""
@@ -777,25 +761,7 @@ class TestSupervisorAcceso:
     # ── FRW-001-F ─────────────────────────────────────────────────────────────
 
     def test_FRW001_F_secciones_hoja_abren_contenido(self, supervisor_logueado):
-        """
-        FRW-001-F: Al hacer click en cada seccion hoja del menu del Supervisor
-        se abre una nueva pestana en la URL correcta, la pagina carga completamente
-        (networkidle + elemento especifico visible) y el contenido es verificado
-        elemento a elemento segun lo descubierto con explorar_secciones_supervisor.py v9.
-
-        Verificaciones por seccion:
-          Vinculos        — #cmbTipoEnlace (Link/Documento/API), inputs, botones, tabla
-          Respuestas      — #tblRespuestasSupervisor con header 'Respuesta', #cmbCliente
-          Importaciones   — filtros (#cmbEstado 3 opciones), tabla, click Filtrar
-          Tipos Tickets   — heading 'ticket', #txtFilterTypes placeholder
-          Busquedas Auto  — #busquedaDesde (Ticket/Contacto), #btnCreateBusqueda
-          Ayuda           — #dt-version con filas de datos, texto de version
-
-        Mecanismo de navegacion (verificado con explorar_secciones_supervisor.py v8):
-          - El SPA requiere click nativo en accionEjecutar_2 (Configuracion) +
-            click en el padre antes de clickear la hoja.
-          - Cada hoja abre una NUEVA PESTANA con ASP.NET WebForms.
-          - Los clicks via evaluate() no abren nueva pestana.
+        """FRW-001-F: [Perfil Supervisor] Navegacion — cada seccion hoja abre nueva pestana en URL correcta con contenido verificado (Vinculos, Respuestas, Importaciones, Tickets, Busquedas, Ayuda).
         """
         page = supervisor_logueado
 
