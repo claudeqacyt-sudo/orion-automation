@@ -53,7 +53,7 @@ from pages.base_page import BasePage
 # Constantes del modulo
 # ─────────────────────────────────────────────────────────────────────────────
 
-FRAMEWORKS_PORT = 8443
+FRAMEWORKS_PORT = 444
 
 import os
 from dotenv import load_dotenv

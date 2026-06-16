@@ -16,26 +16,24 @@ pytestmark = [pytest.mark.regression, pytest.mark.admin]
 
 def _restaurar_sesion(page, base_url, credentials):
     """Navega a admincontactos y re-loguea si la sesión expiró."""
-    try:
-        page.goto(f"{base_url}/admincontactos", wait_until="commit", timeout=10000)
-    except Exception:
-        pass
-    if "/login" in page.url or "login" in page.url.lower():
+    for _intento in range(3):
         try:
-            login = LoginPage(page)
-            login.navigate(base_url)
-            login.login(credentials["username"], credentials["password"])
+            page.goto(f"{base_url}/admincontactos", wait_until="load", timeout=20000)
         except Exception:
             pass
+        if "/login" in page.url:
+            try:
+                login = LoginPage(page)
+                login.navigate(base_url)
+                login.login(credentials["username"], credentials["password"])
+            except Exception:
+                pass
+            time.sleep(2)
         try:
-            page.goto(f"{base_url}/admincontactos", wait_until="commit", timeout=10000)
+            page.locator("#accionEjecutar_4").wait_for(state="visible", timeout=15000)
+            break
         except Exception:
-            pass
-        time.sleep(2)
-    try:
-        page.locator("#accionEjecutar_4").wait_for(state="visible", timeout=20000)
-    except Exception:
-        pass
+            time.sleep(3)
 
 
 def _abrir_monitor(page, base_url, credentials):
