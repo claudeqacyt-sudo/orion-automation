@@ -267,7 +267,6 @@ def replica_grupos_tab(shared_page):
     tab.close()
 
 
-@pytest.mark.skip(reason="Deshabilitado")
 class TestReplicacionGrupos:
     def test_ADM015_A_carga_correctamente(self, replica_grupos_tab):
         """ADM-015-A: Replicación de Grupos carga con selector de cliente."""
