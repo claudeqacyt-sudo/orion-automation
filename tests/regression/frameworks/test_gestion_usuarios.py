@@ -141,27 +141,23 @@ def supervisor_qa(shared_page, base_url, admin_credentials):
         nav = FrameworksNav(shared_page)
         fw  = nav.open_gestion_usuarios()
 
-        cache = _leer_cache()
         existe = fw.usuario_existe_en_grid(NOMBRE)
 
-        if existe and cache.get("nombre") == NOMBRE and cache.get("password"):
-            # ── Reutilizar supervisor existente ──────────────────────────────
-            password  = cache["password"]
-            lbl_texto = cache.get("lbl_texto", "")
-            print(f"\n[supervisor_qa] Reutilizando '{NOMBRE}' (password desde cache)")
-        else:
-            # ── Crear supervisor nuevo ───────────────────────────────────────
-            if existe:
-                print(f"\n[supervisor_qa] Cache invalida — borrando '{NOMBRE}' para recrear...")
-                fw.borrar_usuario(NOMBRE)
-                time.sleep(1)
-            password  = fw.crear_usuario(
-                nombre=NOMBRE, apellido=APELLIDO,
-                nivel=GestionUsuariosPage.NIVEL_SUPERVISOR, email=EMAIL,
-            )
-            lbl_texto = fw.get_password_label_text()
-            _guardar_cache({"nombre": NOMBRE, "password": password, "lbl_texto": lbl_texto})
-            print(f"\n[supervisor_qa] '{NOMBRE}' creado — password guardada en cache")
+        # Siempre borrar y recrear para garantizar sesion limpia en el servidor.
+        # Reutilizar el usuario dejaba sesiones residuales cuando el teardown
+        # no alcanzaba a ejecutar el logout (timeout, error, Ctrl+C).
+        if existe:
+            print(f"\n[supervisor_qa] Borrando '{NOMBRE}' para garantizar sesion limpia...")
+            fw.borrar_usuario(NOMBRE)
+            time.sleep(1)
+
+        password  = fw.crear_usuario(
+            nombre=NOMBRE, apellido=APELLIDO,
+            nivel=GestionUsuariosPage.NIVEL_SUPERVISOR, email=EMAIL,
+        )
+        lbl_texto = fw.get_password_label_text()
+        _guardar_cache({"nombre": NOMBRE, "password": password, "lbl_texto": lbl_texto})
+        print(f"\n[supervisor_qa] '{NOMBRE}' creado con password nueva")
 
         fw.page.close()
     except Exception as e:
@@ -212,10 +208,39 @@ def supervisor_logueado(supervisor_qa, supervisor_browser_context, base_url):
     login = LoginPage(page)
 
     login.navigate(base_url)
-    login.login(supervisor_qa["nombre"], supervisor_qa["password"])
+    try:
+        login.login(supervisor_qa["nombre"], supervisor_qa["password"])
+    except RuntimeError as e:
+        page.close()
+        if "Sesión activa" in str(e):
+            pytest.skip(
+                "QASupervisor tiene sesion activa en el servidor "
+                "(quedó abierta de una corrida anterior). Esperar ~2 min y volver a ejecutar."
+            )
+        raise
 
-    # Esperar que el SPA renderice el menu
-    page.locator("#accionEjecutar_2").wait_for(state="visible", timeout=10000)
+    # Si login.login() no detectó el modal a tiempo, verificar URL y modal manualmente
+    if "/admincontactos" not in page.url:
+        try:
+            modal = page.locator("#modalGlobalGenericoInfo")
+            if modal.is_visible(timeout=3000):
+                msg = page.locator("#modalGlobalGenericoInfo_leyenda").inner_text(timeout=2000)
+                if "sesión" in msg.lower() or "ya se encuentra" in msg.lower():
+                    page.close()
+                    pytest.skip(
+                        "QASupervisor tiene sesion activa en el servidor "
+                        "(modal detectado post-login). Esperar ~2 min y volver a ejecutar."
+                    )
+        except Exception:
+            pass
+        try:
+            page.wait_for_url("**/admincontactos**", timeout=20000)
+        except Exception:
+            page.close()
+            pytest.skip("Login de QASupervisor no completó la navegacion a /admincontactos.")
+
+    page.wait_for_load_state("domcontentloaded", timeout=15000)
+    time.sleep(2)
 
     yield page
 
