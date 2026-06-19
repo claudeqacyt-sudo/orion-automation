@@ -22,6 +22,7 @@ Secciones cubiertas:
   Grabador    — /grabador.aspx
   Ayuda       — /documentacion.aspx
 """
+import os
 import time
 
 import pytest
@@ -37,6 +38,9 @@ FW_PORT = 444
 
 @pytest.fixture(scope="module")
 def fw_base(base_url):
+    fw_url = os.environ.get("FW_BASE_URL", "").strip()
+    if fw_url:
+        return fw_url.rstrip("/")
     return f"{base_url.rstrip('/')}:{FW_PORT}"
 
 
