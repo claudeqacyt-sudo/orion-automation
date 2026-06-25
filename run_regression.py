@@ -22,7 +22,7 @@ def crear_dialogo():
 
     # Centrar en pantalla
     root.update_idletasks()
-    w, h = 440, 400
+    w, h = 440, 340
     x = (root.winfo_screenwidth() - w) // 2
     y = (root.winfo_screenheight() - h) // 2
     root.geometry(f"{w}x{h}+{x}+{y}")
@@ -44,12 +44,7 @@ def crear_dialogo():
     url_entry = ttk.Entry(frame, textvariable=url_var, width=36)
     url_entry.grid(row=row, column=1, sticky="ew", pady=3)
     row += 1
-
-    ttk.Label(frame, text="URL Frameworks").grid(row=row, column=0, sticky="w", pady=3, padx=(0, 10))
-    fw_var = tk.StringVar()
-    ttk.Entry(frame, textvariable=fw_var, width=36).grid(row=row, column=1, sticky="ew", pady=3)
-    row += 1
-    ttk.Label(frame, text="Dejar vacío para usar automático (:444)", foreground="gray", font=("", 8)).grid(
+    ttk.Label(frame, text="URL Frameworks detectada automáticamente desde la navegación", foreground="gray", font=("", 8)).grid(
         row=row, column=1, sticky="w"
     )
     row += 1
@@ -110,7 +105,6 @@ def crear_dialogo():
             url_entry.focus()
             return
         resultado["url"]        = url
-        resultado["fw_url"]     = fw_var.get().strip()
         resultado["admin_user"] = admin_user_var.get().strip() or "cyt"
         resultado["admin_pass"] = admin_pass_var.get().strip() or "Feab4650"
         resultado["agent_user"] = agent_user_var.get().strip() or "1001"
@@ -141,10 +135,9 @@ def main():
         sys.exit(0)
 
     print(f"\nEjecutando en  : {datos['url']}")
-    if datos["fw_url"]:
-        print(f"Frameworks en  : {datos['fw_url']}")
     print(f"Admin          : {datos['admin_user']}")
-    print(f"Agente         : {datos['agent_user']}\n")
+    print(f"Agente         : {datos['agent_user']}")
+    print(f"Frameworks     : se detecta automáticamente desde la navegación\n")
 
     env = os.environ.copy()
     env["ORION_BASE_URL"]    = datos["url"]
@@ -152,10 +145,7 @@ def main():
     env["ADMIN_PASSWORD"]    = datos["admin_pass"]
     env["AGENT_USERNAME"]    = datos["agent_user"]
     env["AGENT_PASSWORD"]    = datos["agent_pass"]
-    if datos["fw_url"]:
-        env["FW_BASE_URL"] = datos["fw_url"]
-    else:
-        env.pop("FW_BASE_URL", None)
+    env.pop("FW_BASE_URL", None)  # ya no se usa — se extrae desde la navegación
 
     resultado = subprocess.run(
         [sys.executable, "-m", "pytest", "tests/regression/", "-m", "regression", "-v"],

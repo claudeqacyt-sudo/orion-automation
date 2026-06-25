@@ -22,14 +22,12 @@ Secciones cubiertas:
   Grabador    — /grabador.aspx
   Ayuda       — /documentacion.aspx
 """
-import os
 import time
+from urllib.parse import urlparse
 
 import pytest
 
 pytestmark = [pytest.mark.regression, pytest.mark.frameworks]
-
-FW_PORT = 444
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -37,11 +35,10 @@ FW_PORT = 444
 # ─────────────────────────────────────────────────────────────────────────────
 
 @pytest.fixture(scope="module")
-def fw_base(base_url):
-    fw_url = os.environ.get("FW_BASE_URL", "").strip()
-    if fw_url:
-        return fw_url.rstrip("/")
-    return f"{base_url.rstrip('/')}:{FW_PORT}"
+def fw_base(fw_tab):
+    """Extrae el base URL de Frameworks desde la URL real de la pestaña abierta."""
+    parsed = urlparse(fw_tab.url)
+    return f"{parsed.scheme}://{parsed.netloc}"
 
 
 @pytest.fixture(scope="module")
