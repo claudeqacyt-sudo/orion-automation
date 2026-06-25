@@ -72,31 +72,29 @@ def fw_tab(shared_page, base_url, admin_credentials):
     with shared_page.context.expect_page(timeout=15000) as tab_info:
         shared_page.evaluate("document.querySelector('#accionEjecutar_44').click()")
     tab = tab_info.value
-
-    # Capturar URL al inicio de la navegación (antes de redirects JS/meta).
-    # Solo se acepta si el origen difiere del de base_url — así distinguimos
-    # Frameworks en otro puerto/host de un redirect de vuelta a la app principal.
-    b = urlparse(base_url)
-    base_origin = (b.hostname, b.port)
-
-    commit_url = ''
-    try:
-        tab.wait_for_load_state("commit", timeout=8000)
-        commit_url = tab.url
-    except Exception:
-        pass
-
     tab.wait_for_load_state("domcontentloaded", timeout=20000)
     time.sleep(1)
 
-    for candidate in (commit_url, tab.url):
-        if not candidate or candidate in ('about:blank', ''):
-            continue
-        p = urlparse(candidate)
-        if p.hostname and (p.hostname, p.port) != base_origin:
-            _fw_base_cache['base'] = f"{p.scheme}://{p.netloc}"
-            print(f"\n[fw_tab] Frameworks detectado en: {_fw_base_cache['base']}")
-            break
+    # Detectar fw_base comparando el netloc del tab con el de base_url.
+    # Si son distintos (diferente host o puerto) el tab está en Frameworks.
+    # Si son iguales, el tab recibió un redirect de vuelta a la app principal
+    # → usar fallback :444 sobre el mismo host.
+    p = urlparse(tab.url)
+    b = urlparse(base_url)
+    if p.netloc and p.netloc != b.netloc:
+        fw = f"{p.scheme}://{p.netloc}"
+    else:
+        fw = f"{b.scheme}://{b.hostname}:{_FW_FALLBACK_PORT}"
+    _fw_base_cache['base'] = fw
+    print(f"\n[fw_tab] Frameworks base URL: {fw}  (tab.url={tab.url})")
+
+    # Navegar a inicio.aspx para resetear el estado de sesion del servidor
+    # (ASP.NET guarda la ultima pagina visitada y redirige ahi en proximas entradas)
+    try:
+        tab.goto(f"{fw}/inicio.aspx", wait_until="domcontentloaded", timeout=20000)
+        time.sleep(1)
+    except Exception:
+        pass
 
     yield tab
 
@@ -110,13 +108,7 @@ def fw_tab(shared_page, base_url, admin_credentials):
 @pytest.fixture(scope="module")
 def fw_base(fw_tab, base_url):
     """URL base del módulo Frameworks, detectada automáticamente desde la navegación."""
-    if 'base' in _fw_base_cache:
-        return _fw_base_cache['base']
-    # Fallback: mismo host con puerto 444 (configuración estándar Orion)
-    parsed = urlparse(base_url)
-    fallback = f"{parsed.scheme}://{parsed.hostname}:{_FW_FALLBACK_PORT}"
-    print(f"\n[fw_base] Usando fallback: {fallback}")
-    return fallback
+    return _fw_base_cache.get('base', f"{urlparse(base_url).scheme}://{urlparse(base_url).hostname}:{_FW_FALLBACK_PORT}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
