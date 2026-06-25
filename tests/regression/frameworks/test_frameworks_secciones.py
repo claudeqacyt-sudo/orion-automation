@@ -22,6 +22,7 @@ Secciones cubiertas:
   Grabador    — /grabador.aspx
   Ayuda       — /documentacion.aspx
 """
+import re
 import time
 from urllib.parse import urlparse
 
@@ -29,22 +30,52 @@ import pytest
 
 pytestmark = [pytest.mark.regression, pytest.mark.frameworks]
 
+_FW_FALLBACK_PORT = 444
+_fw_base_cache = {}  # comparte el valor entre fw_tab y fw_base (scope=module)
+
+
+def _extraer_fw_base_del_dom(page, base_url: str) -> str:
+    """
+    Lee la URL del módulo Frameworks desde el elemento #accionEjecutar_44
+    (antes de hacer click en él). Intenta href, onclick, ng-click y elementos hijo.
+    Retorna 'scheme://host:port' o '' si no se puede detectar.
+    """
+    try:
+        raw = page.evaluate(r"""
+            () => {
+                const el = document.querySelector('#accionEjecutar_44');
+                if (!el) return '';
+                // href directo (elemento <a>)
+                if (el.tagName === 'A' && el.href && el.href.startsWith('http')) return el.href;
+                // atributos de evento
+                for (const attr of ['onclick', 'ng-click', 'data-ng-click', 'ng-href', 'data-url']) {
+                    const v = el.getAttribute(attr) || '';
+                    const m = v.match(/https?:\/\/[\w\-\.:]+(:\d+)?(\/[^'")\s]*)?/);
+                    if (m) return m[0];
+                }
+                // hijo <a> con href
+                const a = el.querySelector('a[href]');
+                if (a && a.href && a.href.startsWith('http')) return a.href;
+                return '';
+            }
+        """)
+        if raw and raw.startswith('http'):
+            p = urlparse(raw)
+            if p.netloc:
+                return f"{p.scheme}://{p.netloc}"
+    except Exception:
+        pass
+    return ''
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Fixtures
 # ─────────────────────────────────────────────────────────────────────────────
 
 @pytest.fixture(scope="module")
-def fw_base(fw_tab):
-    """Extrae el base URL de Frameworks desde la URL real de la pestaña abierta."""
-    parsed = urlparse(fw_tab.url)
-    return f"{parsed.scheme}://{parsed.netloc}"
-
-
-@pytest.fixture(scope="module")
 def fw_tab(shared_page, base_url, admin_credentials):
     """
-    Abre el modulo Frameworks (puerto 444) UNA VEZ para todos los tests de secciones.
+    Abre el modulo Frameworks UNA VEZ para todos los tests de secciones.
     Reutiliza la sesion cyt de shared_page.
     """
     from pages.login_page import LoginPage as _LP
@@ -69,21 +100,56 @@ def fw_tab(shared_page, base_url, admin_credentials):
         except Exception:
             time.sleep(3)
 
-    # Abrir Frameworks: Supervision > Orion Contact Center
+    # Expandir menú Supervisión para que #accionEjecutar_44 esté en el DOM
     shared_page.evaluate("document.querySelector('#accionEjecutar_4').click()")
     time.sleep(1.5)
+
+    # Intentar leer la URL de Frameworks del DOM antes de hacer click
+    detected = _extraer_fw_base_del_dom(shared_page, base_url)
+    if detected:
+        _fw_base_cache['base'] = detected
+        print(f"\n[fw_tab] URL Frameworks detectada del DOM: {detected}")
+
+    # Abrir Frameworks en nueva pestaña
     with shared_page.context.expect_page(timeout=15000) as tab_info:
         shared_page.evaluate("document.querySelector('#accionEjecutar_44').click()")
     tab = tab_info.value
+
+    # Si la detección DOM falló, capturar URL al inicio de la navegación (pre-redirect)
+    if 'base' not in _fw_base_cache:
+        try:
+            tab.wait_for_load_state("commit", timeout=8000)
+            init_url = tab.url
+            if init_url and init_url not in ('about:blank', ''):
+                p = urlparse(init_url)
+                if p.netloc:
+                    _fw_base_cache['base'] = f"{p.scheme}://{p.netloc}"
+                    print(f"\n[fw_tab] URL Frameworks capturada en commit: {_fw_base_cache['base']}")
+        except Exception:
+            pass
+
     tab.wait_for_load_state("domcontentloaded", timeout=20000)
     time.sleep(1)
 
     yield tab
 
+    _fw_base_cache.clear()
     try:
         tab.close()
     except Exception:
         pass
+
+
+@pytest.fixture(scope="module")
+def fw_base(fw_tab, base_url):
+    """URL base del módulo Frameworks, detectada automáticamente desde la navegación."""
+    if 'base' in _fw_base_cache:
+        return _fw_base_cache['base']
+    # Fallback: mismo host que base_url con puerto 444
+    parsed = urlparse(base_url)
+    fallback = f"{parsed.scheme}://{parsed.hostname}:{_FW_FALLBACK_PORT}"
+    print(f"\n[fw_base] Detección automática falló, usando fallback: {fallback}")
+    return fallback
 
 
 # ─────────────────────────────────────────────────────────────────────────────
